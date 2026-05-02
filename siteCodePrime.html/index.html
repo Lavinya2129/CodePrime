@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodePrime — Monte seu Orçamento</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0a0f;
+    --surface:#13131a;
+    --surface2:#1c1c28;
+    --border:#2a2a3d;
+    --accent:#6c63ff;
+    --accent2:#a78bfa;
+    --text:#f0f0ff;
+    --muted:#8b8ba7;
+    --green:#10b981;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  .wrap{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 3rem}
+
+  /* Header */
+  header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;background:rgba(108,99,255,.07);border:0.5px solid var(--border);border-radius:12px;margin-bottom:2rem;flex-wrap:wrap;gap:.75rem}
+  .logo{font-size:1.3rem;font-weight:600;letter-spacing:-.5px}
+  .logo span{color:var(--accent)}
+  .nav{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+  .nav a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s}
+  .nav a:hover{color:var(--text)}
+  .wabtn{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .2s}
+  .wabtn:hover{opacity:.85}
+
+  /* Hero */
+  .hero{text-align:center;margin-bottom:2.5rem}
+  .hero h1{font-size:clamp(1.6rem,4vw,2.6rem);font-weight:600;letter-spacing:-.5px;line-height:1.2;margin-bottom:.75rem}
+  .hero h1 .gradient{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero p{color:var(--muted);font-size:1rem;max-width:520px;margin:0 auto}
+
+  /* Progress */
+  .progress-wrap{margin-bottom:2rem}
+  .progress-labels{display:flex;justify-content:space-between;margin-bottom:.5rem}
+  .step-lbl{font-size:11px;color:var(--muted);transition:color .3s}
+  .step-lbl.done{color:var(--accent2)}
+  .progress-bar{height:3px;background:var(--surface2);border-radius:3px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+  /* Main grid */
+  .main-grid{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:start}
+  @media(max-width:780px){
+    .main-grid{grid-template-columns:1fr}
+    .sidebar{order:-1}
+  }
+
+  .section-title{font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:.5rem}
+  .subtitle-section{font-size:.82rem;color:var(--muted);margin-bottom:.85rem}
+
+  /* Type cards */
+  .types-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:2rem}
+  @media(max-width:500px){.types-grid{grid-template-columns:1fr}}
+  .type-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1rem 1.1rem;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;user-select:none}
+  .type-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .type-card.active{border-color:var(--accent);background:rgba(108,99,255,.1)}
+  .type-card.active::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(108,99,255,.08),rgba(167,139,250,.04));pointer-events:none}
+  .badge-sel{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;opacity:0;transition:opacity .2s}
+  .type-card.active .badge-sel{opacity:1}
+  .type-icon{font-size:22px;margin-bottom:.5rem}
+  .type-name{font-size:.95rem;font-weight:600;margin-bottom:.2rem}
+  .type-price{font-size:1.15rem;color:var(--accent2);font-weight:600}
+  .type-desc{font-size:11px;color:var(--muted);margin-top:.25rem}
+
+  /* Features */
+  .features-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem}
+  .feat-item{display:flex;align-items:center;gap:.75rem;background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:.65rem 1rem;cursor:pointer;transition:all .2s;user-select:none}
+  .feat-item:hover{border-color:rgba(108,99,255,.4)}
+  .feat-item.checked{border-color:rgba(108,99,255,.5);background:rgba(108,99,255,.07)}
+  .feat-cb{width:18px;height:18px;border:1.5px solid var(--border);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;background:transparent}
+  .feat-item.checked .feat-cb{background:var(--accent);border-color:var(--accent)}
+  .feat-cb svg{opacity:0;transition:opacity .15s}
+  .feat-item.checked .feat-cb svg{opacity:1}
+  .feat-info{flex:1}
+  .feat-name{font-size:.88rem;font-weight:500}
+  .feat-price{font-size:.8rem;color:var(--accent2);margin-top:1px}
+  .feat-tag{font-size:10px;color:var(--muted);white-space:nowrap}
+
+  /* Sidebar / Summary */
+  .sidebar{position:sticky;top:1rem}
+  .summary-card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+  .summary-header{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:.85rem}
+  .summary-type{font-size:.95rem;font-weight:500;color:var(--text);margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:0.5px solid var(--border)}
+  .summary-feats{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.85rem;min-height:40px}
+  .sfeat{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:.4rem}
+  .sfeat::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  .total-row{border-top:0.5px solid var(--border);padding-top:.85rem;margin-top:.25rem}
+  .total-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.3rem}
+  .total-val{font-size:2rem;font-weight:600;letter-spacing:-.5px;line-height:1}
+  .total-val .currency{font-size:1.1rem;color:var(--muted);font-weight:400}
+  .prazo-row{margin-top:.75rem;display:flex;align-items:center;gap:.5rem}
+  .prazo-label{font-size:.75rem;color:var(--muted)}
+  .prazo-val{font-size:.82rem;font-weight:500;color:var(--green)}
+  .empty-msg{font-size:.8rem;color:var(--muted);font-style:italic}
+
+  /* Send button */
+  .send-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--accent),#7c3aed);border:none;border-radius:10px;padding:.85rem 1rem;color:#fff;font-size:.95rem;font-weight:500;cursor:pointer;transition:all .25s;letter-spacing:-.2px}
+  .send-btn:hover{opacity:.9;transform:translateY(-1px)}
+  .send-btn:active{transform:scale(.98)}
+
+  /* Footer */
+  footer{text-align:center;margin-top:3rem;color:var(--muted);font-size:.78rem}
+  footer a{color:var(--accent2);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo"><span>code</span>prime</div>
+    <nav class="nav">
+      <a href="#">Serviços</a>
+      <a href="#">Portfólio</a>
+      <a href="#">Contato</a>
+      <button class="wabtn" onclick="openWA()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.117 1.527 5.845L0 24l6.335-1.512A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.013-1.376l-.36-.214-3.732.979.998-3.648-.235-.374A9.818 9.818 0 1112 21.818z"/>
+        </svg>
+        WhatsApp
+      </button>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h1>Monte o orçamento <span class="gradient">do seu site</span></h1>
+    <p>Escolha as opções desejadas e veja o valor atualizado automaticamente em tempo real.</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-labels">
+      <span class="step-lbl done" id="lbl1">1. Tipo de site</span>
+      <span class="step-lbl" id="lbl2">2. Funcionalidades</span>
+      <span class="step-lbl" id="lbl3">3. Resumo</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="pfill" style="width:33%"></div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="left">
+      <p class="section-title">Tipo de site</p>
+      <p class="subtitle-section">Selecione a categoria que melhor descreve o seu projeto</p>
+      <div class="types-grid" id="typesGrid"></div>
+
+      <p class="section-title">Funcionalidades adicionais</p>
+      <p class="subtitle-section">Adicione recursos extras ao seu site</p>
+      <div class="features-list" id="featsList"></div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="summary-card">
+        <p class="summary-header">Resumo do orçamento</p>
+        <div class="summary-type" id="summType">
+          <span style="color:var(--muted);font-style:italic;font-size:.85rem">Nenhum tipo selecionado</span>
+        </div>
+        <div class="summary-feats" id="summFeats">
+          <span class="empty-msg">Sem funcionalidades adicionais</span>
+        </div>
+        <div class="total-row">
+          <p class="total-label">Total estimado</p>
+          <div class="total-val">
+            <span class="currency">R$</span> <span id="totalNum">0</span>
+          </div>
+        </div>
+        <div class="prazo-row">
+          <span class="prazo-label">Prazo estimado:</span>
+          <span class="prazo-val" id="prazoVal">—</span>
+        </div>
+      </div>
+      <button class="send-btn" onclick="enviarOrcamento()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.117 1.527 5.845L0 24l6.335-1.512A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.013-1.376l-.36-.214-3.732.979.998-3.648-.235-.374A9.818 9.818 0 1112 21.818z"/>
+        </svg>
+        Solicitar Orçamento
+      </button>
+    </aside>
+  </div>
+
+  <footer>
+    <p>© 2025 CodePrime · <a href="https://instagram.com/_codeprime" target="_blank">@_codeprime</a></p>
+  </footer>
+</div>
+
+<script>
+const TYPES = [
+  { id: 'lp',  icon: '🚀', name: 'Landing Page',         price: 500,  desc: 'Página única de conversão',    prazo: '7–14 dias'   },
+  { id: 'si',  icon: '🏢', name: 'Site Institucional',    price: 1000, desc: 'Presença corporativa completa', prazo: '15–21 dias'  },
+  { id: 'lv',  icon: '🛒', name: 'Loja Virtual',          price: 1500, desc: 'E-commerce completo',           prazo: '21–35 dias'  },
+  { id: 'sp',  icon: '⚙️', name: 'Sistema Personalizado', price: 2500, desc: 'Solução sob medida',            prazo: '35–60 dias'  },
+];
+
+const FEATS = [
+  { id: 'wa',  name: 'Botão de WhatsApp',        price: 50,   tag: 'Comunicação' },
+  { id: 'ig',  name: 'Integração com Instagram', price: 50,  tag: 'Social'      },
+  { id: 'pa',  name: 'Painel Administrativo',    price: 700,  tag: 'Gestão'      },
+  { id: 'al',  name: 'Área de Login',            price: 500,  tag: 'Acesso'      },
+  { id: 'ag',  name: 'Sistema de Agendamento',   price: 300,  tag: 'Funcional'   },
+  { id: 'cc',  name: 'Carrinho de Compras',      price: 350, tag: 'E-commerce'  },
+  { id: 'seo', name: 'SEO Otimizado',            price: 300,  tag: 'Marketing'   },
+  { id: 'mob', name: 'Responsividade Mobile',    price: 250,  tag: 'Design'      },
+  { id: 'ani', name: 'Animações Modernas',       price: 200,  tag: 'Visual'      },
+];
+
+let selType = null;
+let selFeats = new Set();
+
+function fmtBRL(v) {
+  return v.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function calcTotal() {
+  let t = selType ? selType.price : 0;
+  selFeats.forEach(id => {
+    const f = FEATS.find(x => x.id === id);
+    if (f) t += f.price;
+  });
+  return t;
+}
+
+function animCounter(el, target) {
+  const start = parseInt(el.textContent.replace(/\D/g, '')) || 0;
+  const dur = 400;
+  const s = performance.now();
+  function step(now) {
+    const p = Math.min((now - s) / dur, 1);
+    const ease = p < .5 ? 2 * p * p : (4 - 2 * p) * p - 1;
+    el.textContent = fmtBRL(Math.round(start + (target - start) * ease));
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function updateProgress() {
+  let pct = 33;
+  if (selType) pct = 66;
+  if (selType && selFeats.size > 0) pct = 100;
+  document.getElementById('pfill').style.width = pct + '%';
+  document.getElementById('lbl1').className = 'step-lbl' + (selType ? ' done' : '');
+  document.getElementById('lbl2').className = 'step-lbl' + (selFeats.size > 0 ? ' done' : '');
+  document.getElementById('lbl3').className = 'step-lbl' + (pct === 100 ? ' done' : '');
+}
+
+function updateSummary() {
+  const st = document.getElementById('summType');
+  const sf = document.getElementById('summFeats');
+
+  if (selType) {
+    st.innerHTML = '<span style="font-weight:600">' + selType.name + '</span>'
+      + '<span style="float:right;color:var(--accent2)">R$ ' + fmtBRL(selType.price) + '</span>';
+  } else {
+    st.innerHTML = '<span style="color:var(--muted);font-style:italic;font-size:.85rem">Nenhum tipo selecionado</span>';
+  }
+
+  if (selFeats.size > 0) {
+    sf.innerHTML = '';
+    selFeats.forEach(id => {
+      const f = FEATS.find(x => x.id === id);
+      if (f) {
+        const d = document.createElement('div');
+        d.className = 'sfeat';
+        d.innerHTML = f.name
+          + '<span style="margin-left:auto;color:var(--accent2);font-size:.78rem">+R$ ' + fmtBRL(f.price) + '</span>';
+        sf.appendChild(d);
+      }
+    });
+  } else {
+    sf.innerHTML = '<span class="empty-msg">Sem funcionalidades adicionais</span>';
+  }
+
+  const total = calcTotal();
+  animCounter(document.getElementById('totalNum'), total);
+  document.getElementById('prazoVal').textContent = selType ? selType.prazo : '—';
+  updateProgress();
+}
+
+function renderTypes() {
+  const g = document.getElementById('typesGrid');
+  g.innerHTML = '';
+  TYPES.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'type-card' + (selType && selType.id === t.id ? ' active' : '');
+    d.innerHTML = '<div class="badge-sel">'
+      + '<svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>'
+      + '</div>'
+      + '<div class="type-icon">' + t.icon + '</div>'
+      + '<div class="type-name">' + t.name + '</div>'
+      + '<div class="type-price">R$ ' + fmtBRL(t.price) + '</div>'
+      + '<div class="type-desc">' + t.desc + '</div>';
+    d.onclick = () => { selType = t; renderTypes(); updateSummary(); };
+    g.appendChild(d);
+  });
+}
+
+function renderFeats() {
+  const g = document.getElementById('featsList');
+  g.innerHTML = '';
+  FEATS.forEach(f => {
+    const d = document.createElement('div');
+    d.className = 'feat-item' + (selFeats.has(f.id) ? ' checked' : '');
+    d.innerHTML = '<div class="feat-cb">'
+      + '<svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>'
+      + '</div>'
+      + '<div class="feat-info">'
+      + '<div class="feat-name">' + f.name + '</div>'
+      + '<div class="feat-price">+R$ ' + fmtBRL(f.price) + '</div>'
+      + '</div>'
+      + '<span class="feat-tag">' + f.tag + '</span>';
+    d.onclick = () => {
+      if (selFeats.has(f.id)) selFeats.delete(f.id); else selFeats.add(f.id);
+      d.className = 'feat-item' + (selFeats.has(f.id) ? ' checked' : '');
+      updateSummary();
+    };
+    g.appendChild(d);
+  });
+}
+
+function openWA() {
+  window.open('https://wa.me/5511992129545', '_blank');
+}
+
+function enviarOrcamento() {
+  if (!selType) {
+    alert('Por favor, selecione um tipo de site para continuar.');
+    return;
+  }
+  let msg = 'Olá! Gostaria de solicitar um orçamento pela CodePrime:\n\n';
+  msg += '*Tipo de site:* ' + selType.name + ' (R$ ' + fmtBRL(selType.price) + ')\n';
+  if (selFeats.size > 0) {
+    msg += '\n*Funcionalidades adicionais:*\n';
+    selFeats.forEach(id => {
+      const f = FEATS.find(x => x.id === id);
+      if (f) msg += '- ' + f.name + ' (+R$ ' + fmtBRL(f.price) + ')\n';
+    });
+  }
+  msg += '\n*Valor total: R$ ' + fmtBRL(calcTotal()) + '*';
+  msg += '\n*Prazo estimado: ' + selType.prazo + '*';
+  window.open('https://wa.me/5511992129545?text=' + encodeURIComponent(msg), '_blank');
+}
+
+renderTypes();
+renderFeats();
+updateSummary();
+</script>
+</body>
+</html>
